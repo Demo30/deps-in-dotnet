@@ -11,6 +11,34 @@
     - NuGet.config with LocalFeed path to these packages
     - readme.md dedicated to each scenario describing what is going on and what problematic behavior we encounter
 
+## Scenario c61417, 25a851
+
+- Transitive dependency is referenced from the main project directly with lower version, but higher version of this Transitive dependency is also used by another referenced package.
+
+## Scenario a0a93f, ea0545, mha17d
+
+- Transitive dependency is referenced from the main project directly with higher version in a non-strict fashion ("2.0.0"), but strictly specified lower version ("[1.0.0]") of this Transitive dependency is also used by Direct dependency package reference by the Main app.
+
+- ea0545: Direct dependency references the lower version of Transitive dependency non-strictly
+
+- mha17d: Direct dependency references the lower version of Transitive dependency non-strictly and also the higher version of Transitive dependency has changed return type of used method.
+
+## Scenario a4328d, c2fc88, d0c14d
+
+- There are two different packages referenced which both in turn reference the same Transitive dependency. One of these packages uses lower version. Another one uses a higher version.
+
+- c2fc88 further illustrates how the Transitive dependency may be outside of our focus (since we don't use functionality of Direct dependency B that uses it.).
+
+- d0c14d focuses on introduced nullability from the Transitive dependency and its consequences to the Direct dependency A and its method signature.
+
+
+
+## Scenario ac8156
+
+- The main app used to reference “Direct dependency” by “1.0.0” which in turn referenced “Transitive dependency” by “[1.0.0]”. The main app uses the Transitive dependency directly without explicitly referencing it.
+
+
+
 # Reminder about NuGet's local package cache
 
 - .nupkg packages are prefixed with the scenario's unique id to avoid issues with nuget local package cache on the user's machine
