@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PackageId>mha17d_TransitiveDependency_A</PackageId>
+        <AssemblyName>$(PackageId)</AssemblyName>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Version>2.0.0</Version>
+    </PropertyGroup>
+
+    <ItemGroup>
+      
+    </ItemGroup>
+
+</Project>
