@@ -17,11 +17,13 @@
 
 ## Scenario a0a93f, ea0545, mha17d
 
-- Transitive dependency is referenced from the main project directly with higher version in a non-strict fashion ("2.0.0"), but strictly specified lower version ("[1.0.0]") of this Transitive dependency is also used by Direct dependency package reference by the Main app.
+- Transitive dependency is referenced from the main project directly with higher version, but lower version of this Transitive dependency is also used by Direct dependency package reference by the Main app.
 
-- ea0545: Direct dependency references the lower version of Transitive dependency non-strictly
+- a0a93f: lower version reference in Direct dependency is strict ("[1.0.0]")
 
-- mha17d: Direct dependency references the lower version of Transitive dependency non-strictly and also the higher version of Transitive dependency has changed return type of used method.
+- ea0545: lower version reference in Direct dependency is non-strict ("1.0.0")
+
+- mha17d: lower version reference in Direct dependency is non-strict ("1.0.0") and also the higher version of Transitive dependency has changed return type of used method.
 
 ## Scenario a4328d, c2fc88, d0c14d
 
@@ -30,8 +32,6 @@
 - c2fc88 further illustrates how the Transitive dependency may be outside of our focus (since we don't use functionality of Direct dependency B that uses it.).
 
 - d0c14d focuses on introduced nullability from the Transitive dependency and its consequences to the Direct dependency A and its method signature.
-
-
 
 ## Scenario ac8156
 
