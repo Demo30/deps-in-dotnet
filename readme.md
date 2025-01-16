@@ -5,7 +5,7 @@
 
 # Content of this repo
 
-- Different scenarios are maintained in separate branches prefixed with "scenario_" followed by an unique short id (to avoid reordering and have persistent reference).
+- Different scenarios are maintained in separate branches prefixed with "scenario/" followed by an unique short id (to avoid reordering and have persistent reference).
 - Each branch contains:
     - published .nupkg packages that are referenced from the main app representing the terminal consumer.
     - NuGet.config with LocalFeed path to these packages
