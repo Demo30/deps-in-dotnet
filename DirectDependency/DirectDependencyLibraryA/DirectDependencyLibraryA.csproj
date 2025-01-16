@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PackageId>25a851_DirectLibrary_A</PackageId>
+        <AssemblyName>$(PackageId)</AssemblyName>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Version>2.0.0</Version>
+        <RootNamespace>DirectDependency</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="25a851_TransitiveDependency_A" Version="2.0.0" />
+    </ItemGroup>
+
+</Project>
