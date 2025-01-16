@@ -1,25 +1,22 @@
-# Motivation for this repo
+# Scenario c61417
 
-- Managing project dependencies and having control over them is easy in .NET. Until it's not.
-- This project should help us better understand different (problematic) situations that may arise when dealing with dependencies in .NET.
+## Reference tree 
 
-# Content of this repo
+- Main app directly references:
+    - Direct dependency (by “2.0.0”)
+        - Which references:
+            - Transitive dependency (by "[2.0.0]”) 
+    - Transitive dependency (by “1.0.0”) 
 
-- Different scenarios are maintained in separate branches prefixed with "scenario_" followed by an unique short id (to avoid reordering and have persistent reference).
-- Each branch contains:
-    - published .nupkg packages that are referenced from the main app representing the terminal consumer.
-    - NuGet.config with LocalFeed path to these packages
-    - readme.md dedicated to each scenario describing what is going on and what problematic behavior we encounter
+## Actual dependency resolution 
 
-# Reminder about NuGet's local package cache
+- Regardless of treat warnings as errors setting, the restore/build fails in this case. 
+- The error is: NU1605 
+- This behavior is different from scenario a0a93f 
 
-- .nupkg packages are prefixed with the scenario's unique id to avoid issues with nuget local package cache on the user's machine
-- When experimenting with different versions of packages, beware of the nuget’s local package cache (“.nuget\packages”).
-- When the package consumer attempts to restore the package, nuget first attempts to retrieve the package from the cache based on its identification. 
-- This means that if we restore package A v1 once and then re-publish the package under the same version with different content (due to local experimentation), the older one will still be used unless the cache is cleaned! 
-- Clean up the cache to avoid surprises or use non-conflicting package identifications. 
+## Potential issues 
 
-# Reminder about available syntax for referencing dependencies along with specified version
-
-- Many of the dependency-related issues may occur due to not defining dependency's version strictly enough. Basic \"Version=1.0.0\" means >= 1.0.0, therfore not necessarily version 1.0.0.
-- .NET gives us tools to specify versions of our dependencies in more strict/precise way. We may require exact version by: "[1.0.0]" or we can leverage the version ranging syntax "(1.0.0,5.0.0)" etc. See: https://learn.microsoft.com/en-us/nuget/concepts/package-versioning?tabs=semver20sort#version-ranges
+- Based on behavior of scenario a0a93f the developer may expect a non-issue when upgrading “Direct dependency” to version 2.0.0 (which in turn references “Transitive dependency” v 2.0.0) since their directly referenced “Transitive dependency” library was specified by “1.0.0” which translates to: “>= 1.0.0”. 
+    - However, this is not the case, and the error-level conflict arises. 
+- Besides unexpected behavior, the main app consumer may be locked from upgrading to a higher version of “Direct dependency” without resolving additional issues with references. 
+    - The main app developer may use some other parts of “Transitive dependency” which are now problematic to resolve with never version. 

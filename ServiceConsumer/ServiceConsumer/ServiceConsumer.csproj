@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="c61417_DirectLibrary_A" Version="2.0.0" />
+      <!-- This reference 👆 creates error-level conflict with 👇 by using transitive 2.0.0 -->
+      <!-- NU1605. This is still a build-blocking error even when TreatWarningsAsErrors is disabled -->
+      <PackageReference Include="c61417_TransitiveDependency_A" Version="1.0.0" />
+    </ItemGroup>
+
+</Project>
