@@ -1,25 +1,23 @@
-# Motivation for this repo
+# Scenario a4328d
 
-- Managing project dependencies and having control over them is easy in .NET. Until it's not.
-- This project should help us better understand different (problematic) situations that may arise when dealing with dependencies in .NET.
+## Reference tree 
 
-# Content of this repo
+- Main app directly references:
+    - Direct dependency A (by “1.0.0”)
+        - Which references:
+            - Transitive dependency (by "1.0.0”) // [no strict reference]
+    - Direct dependency B (by “2.0.0”)
+        - Which references:
+            - Transitive dependency (by “2.0.0”) // [no strict reference]
 
-- Different scenarios are maintained in separate branches prefixed with "scenario_" followed by an unique short id (to avoid reordering and have persistent reference).
-- Each branch contains:
-    - published .nupkg packages that are referenced from the main app representing the terminal consumer.
-    - NuGet.config with LocalFeed path to these packages
-    - readme.md dedicated to each scenario describing what is going on and what problematic behavior we encounter
+## Usage 
+- Direct dependency A v 1.0.0 is implemented in such a way that it expects types declared in Transitive dependency v 1.0.0. 
+- Direct dependency B v 2.0.0 is implemented so that it expect new types/method declarations from the Transitive dependency v 2.0.0 
 
-# Reminder about NuGet's local package cache
+## Actual dependency resolution 
 
-- .nupkg packages are prefixed with the scenario's unique id to avoid issues with nuget local package cache on the user's machine
-- When experimenting with different versions of packages, beware of the nuget’s local package cache (“.nuget\packages”).
-- When the package consumer attempts to restore the package, nuget first attempts to retrieve the package from the cache based on its identification. 
-- This means that if we restore package A v1 once and then re-publish the package under the same version with different content (due to local experimentation), the older one will still be used unless the cache is cleaned! 
-- Clean up the cache to avoid surprises or use non-conflicting package identifications. 
+- The project uses transitive dependency of version 2.0.0 
 
-# Reminder about available syntax for referencing dependencies along with specified version
+## Resulting situation, issues 
 
-- Many of the dependency-related issues may occur due to not defining dependency's version strictly enough. Basic \"Version=1.0.0\" means >= 1.0.0, therfore not necessarily version 1.0.0.
-- .NET gives us tools to specify versions of our dependencies in more strict/precise way. We may require exact version by: "[1.0.0]" or we can leverage the version ranging syntax "(1.0.0,5.0.0)" etc. See: https://learn.microsoft.com/en-us/nuget/concepts/package-versioning?tabs=semver20sort#version-ranges
+- By referencing Direct dependency B v 2.0.0 along with Direct A v 1.0.0 we break functionality of Direct A during runtime. Direct A is unable to find suitable method declaration. 
