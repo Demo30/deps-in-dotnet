@@ -25,13 +25,15 @@
 
 - mha17d: lower version reference in Direct dependency is non-strict ("1.0.0") and also the higher version of Transitive dependency has changed return type of used method.
 
-## Scenario a4328d, c2fc88, d0c14d
+## Scenario a4328d, c2fc88, d0c14d, 05d335
 
 - There are two different packages referenced which both in turn reference the same Transitive dependency. One of these packages uses lower version. Another one uses a higher version.
 
-- c2fc88 further illustrates how the Transitive dependency may be outside of our focus (since we don't use functionality of Direct dependency B that uses it.).
+- c2fc88: further illustrates how the Transitive dependency may be outside of our focus (since we don't use functionality of Direct dependency B that uses it.).
 
-- d0c14d focuses on introduced nullability from the Transitive dependency and its consequences to the Direct dependency A and its method signature.
+- d0c14d: focuses on introduced nullability from the Transitive dependency and its consequences to the Direct dependency A and its method signature.
+
+- 05d335: Direct dependency B forces usage of higher Transitive dependency in Direct dependency A. Transitive dependency has changed namespace of its return type.
 
 ## Scenario ac8156
 
