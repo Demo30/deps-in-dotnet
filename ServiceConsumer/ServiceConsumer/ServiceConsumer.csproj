@@ -9,8 +9,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="mha17d_DirectLibrary_A" Version="1.0.0" />
-      <PackageReference Include="mha17d_TransitiveDependency_A" Version="2.0.0" />
+      <PackageReference Include="05d335_DirectLibrary_A" Version="1.0.0" />
+      <PackageReference Include="05d335_TransitiveDependency_A" Version="2.0.0" />
     </ItemGroup>
 
 </Project>

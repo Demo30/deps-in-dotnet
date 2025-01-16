@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <PackageId>mha17d_TransitiveDependency_A</PackageId>
+        <PackageId>05d335_TransitiveDependency_A</PackageId>
         <AssemblyName>$(PackageId)</AssemblyName>
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>

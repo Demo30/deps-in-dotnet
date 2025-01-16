@@ -1,4 +1,5 @@
-﻿using TransitiveDependency.NewNamespace;
+﻿using TransitiveDependency;
+using TransitiveDependency.NewNamespace;
 
 namespace TransitiveDependency;
 

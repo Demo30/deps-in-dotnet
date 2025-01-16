@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <PackageId>c2fc88_DirectLibrary_B</PackageId>
+        <PackageId>05d335_DirectLibrary_B</PackageId>
         <AssemblyName>$(PackageId)</AssemblyName>
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -11,7 +11,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="c2fc88_TransitiveDependency_A" Version="2.0.0" />
+      <PackageReference Include="05d335_TransitiveDependency_A" Version="2.0.0" />
     </ItemGroup>
 
 </Project>
