@@ -1,3 +1,8 @@
+# What is this?
+
+- This is not an app nor a library. This is just educational material on the topic of Dependency resolution in .NET
+- The focus is on the conflicts between libraries and related issues when duplicated with differing versions across the dependency tree.
+
 # Motivation for this repo
 
 - Managing project dependencies and having control over them is easy in .NET. Until it's not.
@@ -38,8 +43,6 @@
 ## Scenario ac8156
 
 - The main app used to reference “Direct dependency” by “1.0.0” which in turn referenced “Transitive dependency” by “[1.0.0]”. The main app uses the Transitive dependency directly without explicitly referencing it.
-
-
 
 # Reminder about NuGet's local package cache
 
