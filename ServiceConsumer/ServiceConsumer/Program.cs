@@ -3,14 +3,28 @@
 using DirectDependency;
 using TransitiveDependency;
 
-var directDep = new LogicWrapperProcessor();
-var input = "Main app";
-var result = directDep.Compute(input);
-Console.WriteLine($"Using the direct dependency processor for input '{input}', result = {result}");
+var directDepA = new LogicWrapperProcessor();
+var directDepB = new LogicWrapperProcessorB();
 
-var directUseOfTransitiveDependency = new SomeLogicProcessor().Calculate(input).Result;
-Console.WriteLine($"Using the transitive dependency directly for input '{input}'; result = {directUseOfTransitiveDependency}");
+string[] inputs = ["anotherPath", "mainApp", "test", "test_A"];
 
+foreach (var input in inputs)
+{
+    string resultA;
+    if (input == "anotherPath")
+    {
+        resultA = directDepA.Compute2(input);
 
-// Direct B
-DifferentFunctionality.Hello();
+    }
+    else
+    {
+        resultA = directDepA.Compute(input);
+        
+    }
+    
+    Console.WriteLine($"Using the direct dependency A processor for input '{input}', result = {resultA}");
+    
+    var resultB = directDepB.Compute(input);
+    Console.WriteLine($"Using the direct dependency B processor for input '{input}', result = {resultB}");
+}
+

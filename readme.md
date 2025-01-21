@@ -1,23 +1,25 @@
-# Scenario c2fc88
+# Scenario bc9686
 
 ## Reference tree and usage 
 
 - Main app directly references:
     - Direct dependency A (by “1.0.0”)
         - Which references:
-            - Transitive dependency (by "1.0.0”) // [no strict reference]
+            - Transitive dependency A (by "1.0.0”) // [no strict reference]
+                - Which references:
+                    - Second level transitive dependency (by "1.0.0") // [no strict reference]
     - Direct dependency B (by “2.0.0”) 
         - Which references:
-            - Transitive dependency (by “2.0.0”) // [no strict reference]
-
-- Usage: 
-    - In case of “Direct dependency A”, the Main app uses a functionality that in turn uses the Transitive dependency.
-    - The “Direct dependency B” also uses the Transitive dependency internally, but only for some other functionality that the Main app doesn’t even use. The Main app may not be aware that “Direct dependency B” would even somehow influence the behavior of Transitive dependency.
+            - Transitive dependency B (by “2.0.0”) // [no strict reference]
+                - Which references:
+                    - Second level transitive dependency (by "2.0.0") // [no strict reference]
 
 ## Situation after upgrade of “Direct dependency B”
 
-- By upgrading “Direct dependency B” because of some other functionality, we have changed the behavior of “Direct dependency A” (by using different “Transitive dependency”). 
+- By upgrading “Direct dependency B” the project now uses "Second level transitive dependency" of version 2.0.0
 
 ## Potential issues 
 
-- Dependencies may be hidden many levels down the dependency line and by upgrading something that does not seem relevant at all, we change behavior of something completely different without realizing these could be in any way related. 
+- Since "Direct dependency A" (1.0.0) now uses Second level transitive dependency of version 2.0.0 transitively through "Transitive dependency A" (1.0.0):
+    - app **is not broken** when Calculate2() method is called even though "Second level transitive dependency" of version 2.0.0 which is binary incompatible is used
+    - app **is broken** when Calculate() method is called even for flows **not** using breaking changed second level transitive method

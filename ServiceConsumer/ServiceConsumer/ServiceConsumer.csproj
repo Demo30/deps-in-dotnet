@@ -9,10 +9,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="c2fc88_DirectLibrary_A" Version="1.0.0" />
+      <PackageReference Include="bc9686_DirectLibrary_A" Version="1.0.0" />
       <!-- By upgrading Direct B 👇 we have changed/broken behavior of Direct A 👆 because they share the same transitive library which differs in version -->
       <!-- There was no warning and we did not even realize that Direct B has anything to do with Direct A -->
-      <PackageReference Include="c2fc88_DirectLibrary_B" Version="2.0.0" />
+      <PackageReference Include="bc9686_DirectLibrary_B" Version="2.0.0" />
     </ItemGroup>
 
 </Project>
