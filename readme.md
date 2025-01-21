@@ -44,6 +44,10 @@
 
 - The main app used to reference “Direct dependency” by “1.0.0” which in turn referenced “Transitive dependency” by “[1.0.0]”. The main app uses the Transitive dependency directly without explicitly referencing it.
 
+## Scenario bc9686
+
+- Another level of dependency tree is introduced along with both A) flow drilling all the way down to the second level transitive dependency that **is still working fine** and B) flow drilling all the way down to the second level transitive dependency that **crashes in runtime call**.
+
 # Reminder about NuGet's local package cache
 
 - .nupkg packages are prefixed with the scenario's unique id to avoid issues with nuget local package cache on the user's machine
