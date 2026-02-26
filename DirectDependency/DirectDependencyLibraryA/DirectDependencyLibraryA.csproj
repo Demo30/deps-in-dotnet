@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="phyb1l_MyLibrary" Version="1.0.0" />
+      <PackageReference Include="phyb1l_MyLibrary" Version="1.0.0" PrivateAssets="All" />
     </ItemGroup>
 
 </Project>

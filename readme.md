@@ -1,23 +1,45 @@
-# Scenario phyb1l - Transitive Dependency Missing (FileNotFoundException)
+# Scenario phyb1l - Missing Transitive Dependency (FileNotFoundException)
 
 ## The Problem
 
-Application uses DirectLibrary which depends on MyLibrary v1.0.0 (transitive dependency). If MyLibrary DLL is missing at runtime, FileNotFoundException occurs.
+DirectLibrary uses MyLibrary but marks it with `PrivateAssets="All"`, so MyLibrary is NOT declared as a transitive dependency. ServiceConsumer only gets DirectLibrary during restore, causing runtime FileNotFoundException.
 
 ## Structure
 
 ```
 ServiceConsumer (net472)
 └── DirectLibrary v1.0.0
-    └── MyLibrary v1.0.0 (transitive) ← Missing!
+    └── MyLibrary v1.0.0 (PrivateAssets="All") ← NOT restored!
 ```
 
-## Scenario
+## Root Cause
 
-1. ServiceConsumer references DirectLibrary
-2. DirectLibrary depends on MyLibrary v1.0.0 (transitive)
-3. MyLibrary DLL missing from bin folder
-4. Runtime tries to load MyLibrary → FileNotFoundException
+DirectLibrary.csproj:
+```xml
+<PackageReference Include="phyb1l_MyLibrary" Version="1.0.0" PrivateAssets="All" />
+```
+
+`PrivateAssets="All"` means:
+- DirectLibrary can use MyLibrary at compile time
+- MyLibrary is NOT listed in DirectLibrary's package dependencies
+- Consumers of DirectLibrary won't get MyLibrary
+
+## Testing
+
+Normal workflow fails:
+```bash
+cd ServiceConsumer
+dotnet restore    # ✅ Succeeds - only gets DirectLibrary
+dotnet build      # ✅ Succeeds - compiles fine
+dotnet run        # 💥 FileNotFoundException!
+```
+
+Check bin folder:
+```bash
+ls ServiceConsumer/bin/Release/net472/*.dll
+# Only shows: phyb1l_DirectLibrary.dll
+# Missing: phyb1l_MyLibrary.dll
+```
 
 ## Error
 
@@ -25,27 +47,11 @@ ServiceConsumer (net472)
 FAILED: FileNotFoundException
 Message: Could not load file or assembly 'phyb1l_MyLibrary, Version=1.0.0.0,
 Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-The system cannot find the file specified.
 ```
 
-## Testing
+## Real-World Causes
 
-Build and test:
-```bash
-cd ServiceConsumer
-dotnet build -c Release
-
-# Works (MyLibrary present):
-ServiceConsumer/bin/Release/net472/ServiceConsumer.exe
-
-# Fails (MyLibrary removed):
-rm ServiceConsumer/bin/Release/net472/phyb1l_MyLibrary.dll
-ServiceConsumer/bin/Release/net472/ServiceConsumer.exe
-```
-
-## Key Points
-
-- Transitive dependencies must be present at runtime
-- Missing transitive DLL triggers FileNotFoundException
-- Error occurs on first use of type from direct dependency
-- Common when DLLs manually deleted or deployment incomplete
+- `PrivateAssets="All"` on dependencies that should be transitive
+- Incorrect package metadata (missing dependency declarations)
+- Dependencies marked as development-only accidentally
+- Hand-edited .nuspec files with missing `<dependencies>` entries
