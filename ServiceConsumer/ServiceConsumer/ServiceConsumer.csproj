@@ -4,6 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net472</TargetFramework>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <NoWarn>MSB3277</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
