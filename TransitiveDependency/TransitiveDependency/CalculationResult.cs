@@ -1,6 +1,7 @@
-﻿namespace TransitiveDependency.NewNamespace;
-
-public class CalculationResult : ICalculationResult
+﻿namespace TransitiveDependency.NewNamespace
 {
-    public required string Result { get; set; }
+    public class CalculationResult : ICalculationResult
+    {
+        public string Result { get; set; }
+    }
 }

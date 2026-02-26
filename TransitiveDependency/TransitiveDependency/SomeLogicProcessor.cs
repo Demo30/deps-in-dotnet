@@ -1,16 +1,15 @@
-﻿using TransitiveDependency;
-using TransitiveDependency.NewNamespace;
+﻿using TransitiveDependency.NewNamespace;
 
-namespace TransitiveDependency;
-
-public class SomeLogicProcessor : ISomeLogicProcessor
+namespace TransitiveDependency
 {
-    public ICalculationResult Calculate(string input)
+    public class SomeLogicProcessor : ISomeLogicProcessor
     {
-        return new CalculationResult
+        public ICalculationResult Calculate(string input)
         {
-        
-            Result = input + " - Transitive dependency v2"
-        };
+            return new CalculationResult
+            {
+                Result = input + " - Transitive dependency v2.0.0"
+            };
+        }
     }
 }

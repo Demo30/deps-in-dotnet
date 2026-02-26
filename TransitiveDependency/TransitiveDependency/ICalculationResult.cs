@@ -1,6 +1,7 @@
-﻿namespace TransitiveDependency.NewNamespace;
-
-public interface ICalculationResult
+﻿namespace TransitiveDependency.NewNamespace
 {
-    public string Result { get; }
+    public interface ICalculationResult
+    {
+        string Result { get; }
+    }
 }

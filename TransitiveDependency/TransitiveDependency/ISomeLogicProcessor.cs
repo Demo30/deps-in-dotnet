@@ -1,8 +1,9 @@
 ﻿using TransitiveDependency.NewNamespace;
 
-namespace TransitiveDependency;
-
-public interface ISomeLogicProcessor
+namespace TransitiveDependency
 {
-    public ICalculationResult Calculate(string input);
+    public interface ISomeLogicProcessor
+    {
+        ICalculationResult Calculate(string input);
+    }
 }

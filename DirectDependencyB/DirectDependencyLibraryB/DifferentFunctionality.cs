@@ -1,7 +1,12 @@
-﻿namespace DirectDependency;
+﻿using System;
 
-public class DifferentFunctionality
+namespace DirectDependency
 {
-    public static void Hello() => Console.WriteLine("Hello");
-
+    public class DifferentFunctionality
+    {
+        public static void Hello()
+        {
+            Console.WriteLine("Hello");
+        }
+    }
 }
