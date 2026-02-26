@@ -1,24 +1,14 @@
-﻿using TransitiveDependency;
+﻿using MyLibrary;
 
-namespace DirectDependency
+namespace DirectLibrary
 {
-    public class LogicWrapperProcessor
+    public class Worker
     {
-        private readonly ISomeLogicProcessor _someLogicProcessor = new SomeLogicProcessor();
+        private readonly IProcessor _processor = new Processor();
 
-        // Method that will CRASH in diamond scenario (uses breaking namespace change)
-        public string Compute(string input)
+        public string DoWork(string input)
         {
-            input += " - hello from direct dependency A";
-            ICalculationResult explicitlyTypedResult = _someLogicProcessor.Calculate(input);
-            return explicitlyTypedResult.Result;
-        }
-
-        // Method that will WORK even in diamond scenario (no namespace dependency)
-        public string ComputeSimple(string input)
-        {
-            input += " - hello from direct dependency A (simple)";
-            return _someLogicProcessor.CalculateSimple(input);
+            return "DirectLibrary: " + _processor.Process(input);
         }
     }
 }

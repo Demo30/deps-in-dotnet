@@ -1,20 +1,10 @@
-﻿using TransitiveDependency.NewNamespace;
-
-namespace TransitiveDependency
+﻿namespace MyLibrary
 {
-    public class SomeLogicProcessor : ISomeLogicProcessor
+    public class Processor : IProcessor
     {
-        public ICalculationResult Calculate(string input)
+        public string Process(string input)
         {
-            return new CalculationResult
-            {
-                Result = input + " - Transitive dependency v2.0.0"
-            };
-        }
-
-        public string CalculateSimple(string input)
-        {
-            return input + " - Simple calculation v2.0.0";
+            return input + " - MyLibrary v2.0.0";
         }
     }
 }

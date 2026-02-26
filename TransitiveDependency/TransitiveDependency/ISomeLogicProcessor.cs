@@ -1,13 +1,7 @@
-﻿using TransitiveDependency.NewNamespace;
-
-namespace TransitiveDependency
+﻿namespace MyLibrary
 {
-    public interface ISomeLogicProcessor
+    public interface IProcessor
     {
-        // Method with breaking change - returns object from namespace that moves in v2.0.0
-        ICalculationResult Calculate(string input);
-
-        // Method with NO breaking change - returns primitive type
-        string CalculateSimple(string input);
+        string Process(string input);
     }
 }

@@ -1,69 +1,51 @@
-# Scenario 7h889t - Diamond Dependency in .NET Framework 4.7.2
+# Scenario phyb1l - Transitive Dependency Missing (FileNotFoundException)
 
 ## The Problem
 
-Diamond dependency: when your app uses libraries A and B, which both depend on different versions of library C. .NET Framework's "highest version wins" strategy can cause runtime crashes.
+Application uses DirectLibrary which depends on MyLibrary v1.0.0 (transitive dependency). If MyLibrary DLL is missing at runtime, FileNotFoundException occurs.
 
 ## Structure
 
 ```
 ServiceConsumer (net472)
-├── DirectDependencyLibraryA v1.0.0 → TransitiveDependency v1.0.0
-└── DirectDependencyLibraryB v1.0.0 → TransitiveDependency v1.0.0  ✅ Works
-    DirectDependencyLibraryB v2.0.0 → TransitiveDependency v2.0.0  💥 Partial Crash
+└── DirectLibrary v1.0.0
+    └── MyLibrary v1.0.0 (transitive) ← Missing!
 ```
 
-**Breaking change in TransitiveDep v2.0.0:** `ICalculationResult` moved from `TransitiveDependency` namespace to `TransitiveDependency.NewNamespace`
+## Scenario
 
-## Method-Specific Failure
+1. ServiceConsumer references DirectLibrary
+2. DirectLibrary depends on MyLibrary v1.0.0 (transitive)
+3. MyLibrary DLL missing from bin folder
+4. Runtime tries to load MyLibrary → FileNotFoundException
 
-DirectDepA has two methods:
-- `ComputeSimple()` - returns `string` → **Works even with v2.0.0**
-- `Compute()` - returns `ICalculationResult` → **Crashes with v2.0.0**
+## Error
 
-The crash is **method-specific**, not library-wide. Only methods with incompatible signatures fail.
+```
+FAILED: FileNotFoundException
+Message: Could not load file or assembly 'phyb1l_MyLibrary, Version=1.0.0.0,
+Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+The system cannot find the file specified.
+```
 
 ## Testing
 
-Edit `ServiceConsumer/ServiceConsumer/ServiceConsumer.csproj`:
-
-**Scenario 1 (all methods work):**
-```xml
-<PackageReference Include="7h889t_DirectLibrary_B" Version="1.0.0" />
-```
-Output:
-```
-ComputeSimple: ... - Simple calculation v1.0.0
-Compute: ... - Transitive dependency v1.0.0
-```
-
-**Scenario 2 (partial failure):**
-```xml
-<PackageReference Include="7h889t_DirectLibrary_B" Version="2.0.0" />
-```
-Output:
-```
-ComputeSimple: ... - Simple calculation v2.0.0  ✅ Works!
-Compute FAILED: MissingMethodException  💥 Crashes!
-```
-
-Build and run:
+Build and test:
 ```bash
 cd ServiceConsumer
 dotnet build -c Release
+
+# Works (MyLibrary present):
+ServiceConsumer/bin/Release/net472/ServiceConsumer.exe
+
+# Fails (MyLibrary removed):
+rm ServiceConsumer/bin/Release/net472/phyb1l_MyLibrary.dll
 ServiceConsumer/bin/Release/net472/ServiceConsumer.exe
 ```
 
-## Why Method-Specific
-
-1. `ComputeSimple()` has signature: `string CalculateSimple(string)` - no namespace-dependent types
-2. `Compute()` has signature: `TransitiveDependency.ICalculationResult Calculate(string)` - depends on type that moved
-3. Runtime can find `CalculateSimple` in v2.0.0 (signature unchanged)
-4. Runtime cannot find `Calculate` with `TransitiveDependency.ICalculationResult` return type (now in `NewNamespace`)
-
 ## Key Points
 
-- Crashes are **per-method**, not per-library
-- Only methods using types that changed signature will fail
-- Methods using primitives or unchanged types continue to work
-- This makes debugging harder - some functionality works, some doesn't
+- Transitive dependencies must be present at runtime
+- Missing transitive DLL triggers FileNotFoundException
+- Error occurs on first use of type from direct dependency
+- Common when DLLs manually deleted or deployment incomplete
