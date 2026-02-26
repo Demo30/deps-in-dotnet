@@ -1,57 +1,75 @@
-# Scenario phyb1l - Missing Transitive Dependency (FileNotFoundException)
+# Scenario phyb1l - FileLoadException with Inner Exception
 
-## The Problem
+## Problem
 
-DirectLibrary uses MyLibrary but marks it with `PrivateAssets="All"`, so MyLibrary is NOT declared as a transitive dependency. ServiceConsumer only gets DirectLibrary during restore, causing runtime FileNotFoundException.
+Binding redirect forces non-existent assembly version → FileLoadException with inner exception.
+
+```
+FileLoadException: Could not load 'Assembly, Version=X.X.X.X, PublicKeyToken=...'
+---> Inner: Could not load 'Assembly, Version=Y.Y.Y.Y, PublicKeyToken=...'
+```
 
 ## Structure
 
 ```
 ServiceConsumer (net472)
-└── DirectLibrary v1.0.0
-    └── MyLibrary v1.0.0 (PrivateAssets="All") ← NOT restored!
+└── DirectDependency v1.0.0
+    └── TransitiveDependency v1.0.0
+
+App.config: Binding redirect v1 → v2 (doesn't exist)
 ```
 
 ## Root Cause
 
-DirectLibrary.csproj:
+**App.config**:
 ```xml
-<PackageReference Include="phyb1l_MyLibrary" Version="1.0.0" PrivateAssets="All" />
+<assemblyBinding>
+  <dependentAssembly>
+    <assemblyIdentity name="phyb1l_TransitiveDependency" publicKeyToken="245a80169ac37524" />
+    <bindingRedirect oldVersion="0.0.0.0-9.9.9.9" newVersion="2.0.0.0" />
+  </dependentAssembly>
+</assemblyBinding>
 ```
 
-`PrivateAssets="All"` means:
-- DirectLibrary can use MyLibrary at compile time
-- MyLibrary is NOT listed in DirectLibrary's package dependencies
-- Consumers of DirectLibrary won't get MyLibrary
+**Cascade**:
+1. DirectDependency compiled against v1.0.0
+2. Binding redirect forces v2.0.0
+3. v2.0.0 doesn't exist → FileLoadException
+4. Fallback to v1.0.0 → also fails (redirect enforced)
+5. Inner exception captures fallback attempt
 
 ## Testing
 
-Normal workflow fails:
 ```bash
-cd ServiceConsumer
-dotnet restore    # ✅ Succeeds - only gets DirectLibrary
-dotnet build      # ✅ Succeeds - compiles fine
-dotnet run        # 💥 FileNotFoundException!
+cd ServiceConsumer/ServiceConsumer
+dotnet build -c Release
+./bin/Release/net472/ServiceConsumer.exe
 ```
 
-Check bin folder:
-```bash
-ls ServiceConsumer/bin/Release/net472/*.dll
-# Only shows: phyb1l_DirectLibrary.dll
-# Missing: phyb1l_MyLibrary.dll
+**Expected**:
 ```
-
-## Error
-
-```
-FAILED: FileNotFoundException
-Message: Could not load file or assembly 'phyb1l_MyLibrary, Version=1.0.0.0,
-Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+FAILED: FileLoadException
+Message: ...Version=2.0.0.0, PublicKeyToken=245a80169ac37524...
+Inner Message: ...Version=1.0.0.0, PublicKeyToken=245a80169ac37524...
 ```
 
 ## Real-World Causes
 
-- `PrivateAssets="All"` on dependencies that should be transitive
-- Incorrect package metadata (missing dependency declarations)
-- Dependencies marked as development-only accidentally
-- Hand-edited .nuspec files with missing `<dependencies>` entries
+- Misconfigured binding redirects
+- Deployment version mismatches
+- Package restore pulls wrong version
+- CI/CD environment differences
+
+## Key Points
+
+**Strong Naming**: Both versions signed with same key → same PublicKeyToken → enables specific binding redirects.
+
+**Inner Exception**: .NET assembly loading cascade - tries redirect target, then fallback, both fail.
+
+**Comparison to Microsoft Packages**:
+```
+Real:    Microsoft.Extensions.Configuration.Binder v9.0.0.9 → v9.0.0.7
+Our repro: phyb1l_TransitiveDependency v2.0.0.0 → v1.0.0.0
+```
+
+Same pattern: Same PublicKeyToken, inner exception shows what was found, binding redirect + version mismatch.
