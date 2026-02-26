@@ -1,4 +1,4 @@
-﻿namespace MyLibrary
+﻿namespace TransitiveDependency
 {
     public interface IProcessor
     {

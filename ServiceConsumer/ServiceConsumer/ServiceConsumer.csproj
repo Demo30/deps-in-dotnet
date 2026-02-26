@@ -7,7 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="phyb1l_DirectLibrary" Version="1.0.0" />
+        <PackageReference Include="phyb1l_DirectDependency" Version="1.0.0" />
+        <PackageReference Include="phyb1l_DirectDependencyB" Version="1.0.0" />
+        <PackageReference Include="phyb1l_TransitiveDependency" Version="1.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="App.config" />
     </ItemGroup>
 
 </Project>

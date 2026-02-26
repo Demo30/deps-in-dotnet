@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <PackageId>phyb1l_DirectDependency</PackageId>
+        <PackageId>phyb1l_DirectDependencyB</PackageId>
         <AssemblyName>$(PackageId)</AssemblyName>
         <TargetFramework>net472</TargetFramework>
         <Version>1.0.0</Version>
@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="phyb1l_TransitiveDependency" Version="1.0.0" />
+      <PackageReference Include="phyb1l_TransitiveDependency" Version="2.0.0" />
     </ItemGroup>
 
 </Project>

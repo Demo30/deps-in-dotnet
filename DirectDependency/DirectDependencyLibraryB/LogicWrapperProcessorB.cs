@@ -2,13 +2,13 @@
 
 namespace DirectDependency
 {
-    public class Worker
+    public class WorkerB
     {
         private readonly IProcessor _processor = new Processor();
 
-        public string DoWork(string input)
+        public string DoWorkB(string input)
         {
-            return "DirectDependency: " + _processor.Process(input);
+            return "DirectDependencyB: " + _processor.Process(input);
         }
     }
 }

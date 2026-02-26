@@ -1,10 +1,10 @@
-﻿namespace MyLibrary
+﻿namespace TransitiveDependency
 {
     public class Processor : IProcessor
     {
         public string Process(string input)
         {
-            return input + " - MyLibrary v2.0.0";
+            return input + " - TransitiveDependency v2.0.0";
         }
     }
 }
