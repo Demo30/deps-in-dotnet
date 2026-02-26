@@ -6,15 +6,28 @@ class Program
     static void Main(string[] args)
     {
         var input = "Main app";
-
-        // Using DirectDependencyLibraryA (which uses TransitiveDependency v1.0.0)
         var directDepA = new LogicWrapperProcessor();
-        var resultA = directDepA.Compute(input);
-        Console.WriteLine($"DirectDepA result: {resultA}");
 
-        // Using DirectDependencyLibraryB
-        var directDepB = new LogicWrapperProcessorB();
-        var resultB = directDepB.Compute(input);
-        Console.WriteLine($"DirectDepB result: {resultB}");
+        Console.WriteLine("=== Testing DirectDepA methods ===");
+
+        try
+        {
+            var simpleResult = directDepA.ComputeSimple(input);
+            Console.WriteLine($"Method 'ComputeSimple' was SUCCESS: {simpleResult}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Method 'ComputeSimple' was FAILURE: {ex.GetType().Name}");
+        }
+
+        try
+        {
+            var complexResult = directDepA.Compute(input);
+            Console.WriteLine($"Method 'Compute' was SUCCESS: {complexResult}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Method 'Compute' was FAILURE: {ex.GetType().Name} - {ex.Message}");
+        }
     }
 }
