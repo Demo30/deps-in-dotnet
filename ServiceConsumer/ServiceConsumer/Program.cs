@@ -1,8 +1,15 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿// using DirectDependency;
 
-using DirectDependency;
+using System;
 
-var directDep = new LogicWrapperProcessor();
-var input = "Main app";
-var result = directDep.Compute(input);
-Console.WriteLine($"Using the direct dependency processor for input '{input}', result = {result}");
+class Program
+{
+    static void Main(string[] args)
+    {
+        // var directDep = new LogicWrapperProcessor();
+        var input = "Main app";
+        // var result = directDep.Compute(input);
+        var result = "local test";
+        Console.WriteLine($"Using the direct dependency processor for input '{input}', result = {result}");
+    }
+}
