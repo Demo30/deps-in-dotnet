@@ -5,13 +5,6 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Diamond dependency scenario with NATURAL FileLoadException:");
-        Console.WriteLine("- DirectDependencyA depends on TransitiveDependency v1.0.0");
-        Console.WriteLine("- DirectDependencyB depends on TransitiveDependency v2.0.0");
-        Console.WriteLine("- v1 and v2 signed with DIFFERENT keys -> different PublicKeyTokens");
-        Console.WriteLine("- NuGet picks v2.0.0 (highest version wins)");
-        Console.WriteLine("- Result: DirectDependencyA will fail looking for v1 with specific PublicKeyToken!");
-        Console.WriteLine();
 
         try
         {
@@ -23,6 +16,11 @@ class Program
         {
             Console.WriteLine($"WorkerA FAILED: {ex.GetType().Name}");
             Console.WriteLine($"Message: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                Console.WriteLine($"Inner Exception: {ex.InnerException.GetType().Name}");
+                Console.WriteLine($"Inner Message: {ex.InnerException.Message}");
+            }
         }
 
         Console.WriteLine();
@@ -37,6 +35,11 @@ class Program
         {
             Console.WriteLine($"WorkerB FAILED: {ex.GetType().Name}");
             Console.WriteLine($"Message: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                Console.WriteLine($"Inner Exception: {ex.InnerException.GetType().Name}");
+                Console.WriteLine($"Inner Message: {ex.InnerException.Message}");
+            }
         }
     }
 }
