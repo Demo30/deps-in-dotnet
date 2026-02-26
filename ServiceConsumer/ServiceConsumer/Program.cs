@@ -5,11 +5,12 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Diamond dependency scenario:");
+        Console.WriteLine("Diamond dependency scenario with NATURAL FileLoadException:");
         Console.WriteLine("- DirectDependencyA depends on TransitiveDependency v1.0.0");
         Console.WriteLine("- DirectDependencyB depends on TransitiveDependency v2.0.0");
-        Console.WriteLine("- NuGet picked v2.0.0");
-        Console.WriteLine("- App.config binding redirect forces v9.0.0 (doesn't exist!)");
+        Console.WriteLine("- v1 and v2 signed with DIFFERENT keys -> different PublicKeyTokens");
+        Console.WriteLine("- NuGet picks v2.0.0 (highest version wins)");
+        Console.WriteLine("- Result: DirectDependencyA will fail looking for v1 with specific PublicKeyToken!");
         Console.WriteLine();
 
         try
