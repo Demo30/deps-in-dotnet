@@ -27,10 +27,10 @@
 ### 3. Built NuGet Packages
 
 All packages built successfully for net472:
-- `05d335_TransitiveDependency_A.1.0.0.nupkg` - Uses TransitiveDependency namespace
-- `05d335_TransitiveDependency_A.2.0.0.nupkg` - Uses TransitiveDependency.NewNamespace
-- `05d335_DirectLibrary_A.1.0.0.nupkg` - References TransitiveDep v1.0.0
-- `05d335_DirectLibrary_B.2.0.0.nupkg` - References TransitiveDep v2.0.0
+- `7h889t_TransitiveDependency_A.1.0.0.nupkg` - Uses TransitiveDependency namespace
+- `7h889t_TransitiveDependency_A.2.0.0.nupkg` - Uses TransitiveDependency.NewNamespace
+- `7h889t_DirectLibrary_A.1.0.0.nupkg` - References TransitiveDep v1.0.0
+- `7h889t_DirectLibrary_B.2.0.0.nupkg` - References TransitiveDep v2.0.0
 
 ### 4. Runtime Diamond Conflict Achieved! 
 

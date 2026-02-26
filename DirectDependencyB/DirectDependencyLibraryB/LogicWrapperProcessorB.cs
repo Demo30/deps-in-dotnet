@@ -9,7 +9,7 @@ namespace DirectDependency
 
         public string Compute(string input)
         {
-            input += " - Hello from Direct dependency B (using v2.0.0)";
+            input += " - Hello from Direct dependency B v2.0.0";
             // Using ICalculationResult from TransitiveDependency.NewNamespace (v2.0.0)
             ICalculationResult result = _someLogicProcessor.Calculate(input);
             return result.Result;
