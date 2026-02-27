@@ -5,8 +5,8 @@
 This scenario demonstrates a **good use of binding redirects** to resolve a diamond dependency
 problem where `TransitiveDependency` v2.0.0 is fully backwards compatible with v1.0.0.
 
-Two pre-compiled vendor libraries both depend on `TransitiveDependency`, but at different versions.
-You cannot recompile either library. The binding redirect lets the consumer tell the CLR:
+Both direct dependencies represent third-party vendor libraries — pre-built `.nupkg` files in
+`_BuiltPackages` that you consume without access to their source. The binding redirect lets the consumer tell the CLR:
 "when `DirectDependencyA` asks for v1.0.0, give it v2.0.0 — they are compatible."
 
 ## Structure
