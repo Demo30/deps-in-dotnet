@@ -48,6 +48,18 @@
 
 - Another level of dependency tree is introduced along with both A) flow drilling all the way down to the second level transitive dependency that **is still working fine** and B) flow drilling all the way down to the second level transitive dependency that **crashes in runtime call**.
 
+## .NET Framework scenarios
+
+The scenarios below are specific to .NET Framework (4.7.2) and involve concepts such as assembly binding redirects and strong naming that do not apply to .NET (Core / 5+).
+
+### Scenario phyb1l
+
+- A misconfigured binding redirect in `App.config` redirects all versions (0.0.0.0–9.9.9.9) of the Transitive dependency to version 2.0.0.0, which does not exist. The runtime cannot load the assembly and throws a `FileLoadException`. The inner exception documents a failed fallback attempt back to version 1.0.0.0, which is also blocked by the redirect — resulting in a cascading nested exception failure.
+
+### Scenario 7h889t
+
+- A diamond dependency problem where both Direct dependency A and Direct dependency B reference the same Transitive dependency at different versions. Due to the "highest version wins" resolution strategy, a breaking change in the Transitive dependency (a namespace relocation of `ICalculationResult`) causes a **partial runtime failure**: methods returning primitive types (`ComputeSimple()`) continue to work, while methods depending on the relocated type (`Compute()`) throw a `MissingMethodException`.
+
 # Reminder about NuGet's local package cache
 
 - .nupkg packages are prefixed with the scenario's unique id to avoid issues with nuget local package cache on the user's machine
