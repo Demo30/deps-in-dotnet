@@ -60,6 +60,10 @@ The scenarios below are specific to .NET Framework (4.7.2) and involve concepts 
 
 - A diamond dependency problem where both Direct dependency A and Direct dependency B reference the same Transitive dependency at different versions. Due to the "highest version wins" resolution strategy, a breaking change in the Transitive dependency (a namespace relocation of `ICalculationResult`) causes a **partial runtime failure**: methods returning primitive types (`ComputeSimple()`) continue to work, while methods depending on the relocated type (`Compute()`) throw a `MissingMethodException`.
 
+### Scenario vp1143
+
+- The same diamond dependency structure as `7h889t`, but Transitive dependency v2.0.0 is **backwards compatible** (no breaking changes). The consumer resolves the conflict with two steps: an explicit NuGet version pin (to satisfy the package graph) and a binding redirect in `App.config` (to tell the CLR to serve v2.0.0 to anyone asking for v1.0.0 at runtime). Contrasts `7h889t` by showing when a binding redirect **can** fix the diamond problem.
+
 # Reminder about NuGet's local package cache
 
 - .nupkg packages are prefixed with the scenario's unique id to avoid issues with nuget local package cache on the user's machine
