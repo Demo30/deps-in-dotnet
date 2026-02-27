@@ -62,7 +62,7 @@ The scenarios below are specific to .NET Framework (4.7.2) and involve concepts 
 
 ### Scenario vp1143
 
-- The same diamond dependency structure as `7h889t`, but Transitive dependency v2.0.0 is **backwards compatible** (no breaking changes). The consumer resolves the conflict with two steps: an explicit NuGet version pin (to satisfy the package graph) and a binding redirect in `App.config` (to tell the CLR to serve v2.0.0 to anyone asking for v1.0.0 at runtime). Contrasts `7h889t` by showing when a binding redirect **can** fix the diamond problem.
+- The same diamond dependency structure as `7h889t`, but Transitive dependency v2.0.0 is **backwards compatible** (no breaking changes). Both direct dependencies are consumed as pre-built packages — simulating third-party vendor libraries whose source you don't own. The consumer resolves the conflict in two steps: an explicit NuGet version pin (to satisfy the package graph) and a binding redirect in `App.config` (to tell the CLR to serve v2.0.0 to anyone asking for v1.0.0 at runtime). Contrasts `7h889t` by showing when a binding redirect **can** fix the diamond problem.
 
 # Reminder about NuGet's local package cache
 
