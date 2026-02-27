@@ -5,86 +5,82 @@ echo "Binding Redirect Test Scenarios (vp1143)"
 echo "=========================================="
 echo ""
 
-# Colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 CONSUMER_DIR="/c/repositories/_personalRepos/deps-in-dotnet/ServiceConsumer"
-CSPROJ="$CONSUMER_DIR/ServiceConsumer/ServiceConsumer.csproj"
+APP_CONFIG="$CONSUMER_DIR/ServiceConsumer/App.config"
 EXE="$CONSUMER_DIR/ServiceConsumer/bin/Release/net472/ServiceConsumer.exe"
-
-restore_pin() {
-    sed -i 's|<!-- PIN_DISABLED|<!-- PIN_DISABLED|' "$CSPROJ"
-    sed -i 's|PIN_DISABLED_START -->||g' "$CSPROJ"
-    sed -i 's|<!-- PIN_DISABLED_END -->||g' "$CSPROJ"
-}
-
-remove_pin() {
-    sed -i 's|<PackageReference Include="vp1143_TransitiveDependency_A" Version="2.0.0" />|<!-- PIN_DISABLED_START --><PackageReference Include="vp1143_TransitiveDependency_A" Version="2.0.0" /><!-- PIN_DISABLED_END -->|g' "$CSPROJ"
-}
 
 build_and_run() {
     cd "$CONSUMER_DIR"
-    dotnet restore > /dev/null 2>&1
-    local restore_exit=$?
-
-    if [ $restore_exit -ne 0 ]; then
-        echo -e "${RED}Restore failed! (NuGet cannot resolve conflicting version constraints)${NC}"
-        dotnet restore 2>&1 | grep "error NU"
-        return 1
-    fi
-
     dotnet build -c Release > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         echo -e "${RED}Build failed!${NC}"
         return 1
     fi
-
     echo -e "${GREEN}Build successful!${NC}"
     echo "Running application..."
     echo ""
     "$EXE"
-    if [ $? -eq 0 ]; then
-        echo ""
+    local exit_code=$?
+    echo ""
+    if [ $exit_code -eq 0 ]; then
         echo -e "${GREEN}✅ Application ran successfully!${NC}"
-        return 0
     else
-        echo ""
         echo -e "${RED}💥 Application crashed!${NC}"
-        return 1
     fi
+    return $exit_code
 }
 
 # -------------------------------------------------------------------
-# Scenario 1: No explicit pin — NuGet cannot resolve the conflict
+# Scenario 1: No binding redirect — CLR cannot match v1.0.0 reference
 # -------------------------------------------------------------------
-echo -e "${YELLOW}=== SCENARIO 1: No explicit version pin ===${NC}"
-echo "DirectLibraryA requires TransitiveDependency [=1.0.0]"
-echo "DirectLibraryB requires TransitiveDependency [=2.0.0]"
-echo "Expected: 💥 NuGet resolution failure (NU1107)"
+echo -e "${YELLOW}=== SCENARIO 1: No binding redirect ===${NC}"
+echo "DirectLibraryA.dll compiled against TransitiveDependency v1.0.0.0 (strong name)"
+echo "Output folder contains TransitiveDependency v2.0.0.0 (NuGet picked highest)"
+echo "No redirect telling the CLR how to resolve the mismatch"
+echo "Expected: 💥 FileLoadException (manifest definition does not match)"
 echo ""
-remove_pin
+
+cat > "$APP_CONFIG" << 'EOF'
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+</configuration>
+EOF
+
 build_and_run
 RESULT1=$?
-
-# Restore csproj
-cd "/c/repositories/_personalRepos/deps-in-dotnet"
-git checkout ServiceConsumer/ServiceConsumer/ServiceConsumer.csproj > /dev/null 2>&1
 
 echo ""
 echo ""
 sleep 1
 
 # -------------------------------------------------------------------
-# Scenario 2: Explicit pin to v2.0.0 + binding redirect in App.config
+# Scenario 2: Correct binding redirect — CLR resolves v1.0.0 → v2.0.0
 # -------------------------------------------------------------------
-echo -e "${YELLOW}=== SCENARIO 2: Explicit pin v2.0.0 + binding redirect ===${NC}"
-echo "ServiceConsumer explicitly pins TransitiveDependency to v2.0.0"
-echo "App.config binding redirect: 1.0.0-9.9.9.9 -> 2.0.0"
-echo "Expected: ✅ Both methods succeed (v2.0.0 is backwards compatible)"
+echo -e "${YELLOW}=== SCENARIO 2: Correct binding redirect ===${NC}"
+echo "Same setup, but App.config redirects all v1.0.0-v9.9.9.9 requests to v2.0.0"
+echo "v2.0.0 is backwards compatible — same interface, no breaking changes"
+echo "Expected: ✅ Both methods succeed"
 echo ""
+
+cat > "$APP_CONFIG" << 'EOF'
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="vp1143_TransitiveDependency_A" culture="neutral" publicKeyToken="245a80169ac37524" />
+        <bindingRedirect oldVersion="1.0.0.0-9.9.9.9" newVersion="2.0.0.0" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+</configuration>
+EOF
+
 build_and_run
 RESULT2=$?
 
@@ -95,15 +91,15 @@ echo "Test Summary"
 echo "=========================================="
 
 if [ $RESULT1 -ne 0 ]; then
-    echo -e "Scenario 1 (no pin):              ${GREEN}✅ PASSED${NC} (NuGet conflict as expected)"
+    echo -e "Scenario 1 (no redirect):      ${GREEN}✅ PASSED${NC} (crashed as expected)"
 else
-    echo -e "Scenario 1 (no pin):              ${RED}❌ FAILED${NC} (should have failed)"
+    echo -e "Scenario 1 (no redirect):      ${RED}❌ FAILED${NC} (should have crashed)"
 fi
 
 if [ $RESULT2 -eq 0 ]; then
-    echo -e "Scenario 2 (pin + redirect):      ${GREEN}✅ PASSED${NC} (resolved as expected)"
+    echo -e "Scenario 2 (with redirect):    ${GREEN}✅ PASSED${NC} (resolved as expected)"
 else
-    echo -e "Scenario 2 (pin + redirect):      ${RED}❌ FAILED${NC} (unexpected)"
+    echo -e "Scenario 2 (with redirect):    ${RED}❌ FAILED${NC} (unexpected)"
 fi
 
 echo ""

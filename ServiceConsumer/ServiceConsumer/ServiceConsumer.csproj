@@ -5,13 +5,17 @@
         <TargetFramework>net472</TargetFramework>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <NoWarn>MSB3277;NU1608</NoWarn>
+        <!-- Disabled so MSBuild does not silently auto-generate redirects and mask the conflict.
+             In real projects this is on by default, which is why version conflicts often resolve
+             transparently without the developer needing to write redirects manually. -->
+        <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="vp1143_DirectLibrary_A" Version="1.0.0" />
         <PackageReference Include="vp1143_DirectLibrary_B" Version="1.0.0" />
         <!-- Explicit pin required: DirectLibraryA wants [1.0.0], DirectLibraryB wants [2.0.0].
-             NuGet cannot resolve the conflict on its own - we choose v2.0.0 because it is
+             NuGet cannot resolve the conflict on its own — we choose v2.0.0 because it is
              backwards compatible. The binding redirect in App.config then tells the CLR to
              accept v2.0.0 when DirectLibraryA asks for v1.0.0 at runtime. -->
         <PackageReference Include="vp1143_TransitiveDependency_A" Version="2.0.0" />
