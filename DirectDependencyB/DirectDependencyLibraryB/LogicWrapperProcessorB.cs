@@ -1,7 +1,6 @@
-﻿using TransitiveDependency;
-using TransitiveDependency.NewNamespace;
+using TransitiveDependency;
 
-namespace DirectDependency
+namespace DirectDependencyB
 {
     public class LogicWrapperProcessorB
     {
@@ -9,10 +8,7 @@ namespace DirectDependency
 
         public string Compute(string input)
         {
-            input += " - Hello from Direct dependency B v2.0.0";
-            // Using ICalculationResult from TransitiveDependency.NewNamespace (v2.0.0)
-            ICalculationResult result = _someLogicProcessor.Calculate(input);
-            return result.Result;
+            return _someLogicProcessor.Calculate(input + " - via DirectDependencyB");
         }
     }
 }

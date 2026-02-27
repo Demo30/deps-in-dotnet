@@ -1,15 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <PackageId>7h889t_TransitiveDependency_A</PackageId>
+        <PackageId>vp1143_TransitiveDependency_A</PackageId>
         <AssemblyName>$(PackageId)</AssemblyName>
         <TargetFramework>net472</TargetFramework>
         <Version>2.0.0</Version>
+        <AssemblyVersion>2.0.0.0</AssemblyVersion>
         <LangVersion>7.3</LangVersion>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\shared.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
-
-    <ItemGroup>
-      
-    </ItemGroup>
 
 </Project>

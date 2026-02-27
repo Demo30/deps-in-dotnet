@@ -1,4 +1,5 @@
-﻿using DirectDependency;
+using DirectDependency;
+using DirectDependencyB;
 using System;
 
 class Program
@@ -8,35 +9,25 @@ class Program
         var input = "Main app";
         var directDepA = new LogicWrapperProcessor();
         var directDepB = new LogicWrapperProcessorB();
-        
+
         try
         {
-            var simpleResult = directDepB.Compute(input);
-            Console.WriteLine($"[DirectDepB] Method 'Compute' was SUCCESS: {simpleResult}");
+            var result = directDepA.Compute(input);
+            Console.WriteLine($"[DirectDepA] Compute was SUCCESS: {result}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[DirectDepB] Method 'Compute' was FAILURE: {ex.GetType().Name}");
-        }
-        
-        try
-        {
-            var simpleResult = directDepA.ComputeSimple(input);
-            Console.WriteLine($"[DirectDepA] Method 'ComputeSimple' was SUCCESS: {simpleResult}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[DirectDepA] Method 'ComputeSimple' was FAILURE: {ex.GetType().Name}");
+            Console.WriteLine($"[DirectDepA] Compute was FAILURE: {ex.GetType().Name} - {ex.Message}");
         }
 
         try
         {
-            var complexResult = directDepA.Compute(input);
-            Console.WriteLine($"[DirectDepA] Method 'Compute' was SUCCESS: {complexResult}");
+            var result = directDepB.Compute(input);
+            Console.WriteLine($"[DirectDepB] Compute was SUCCESS: {result}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[DirectDepA] Method 'Compute' was FAILURE: {ex.GetType().Name} - {ex.Message}");
+            Console.WriteLine($"[DirectDepB] Compute was FAILURE: {ex.GetType().Name} - {ex.Message}");
         }
     }
 }
