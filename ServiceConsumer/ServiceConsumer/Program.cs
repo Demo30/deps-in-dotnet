@@ -1,7 +1,6 @@
 using DirectDependency;
 using DirectDependencyB;
 using System;
-using System.Net.Http;
 
 class Program
 {
@@ -15,7 +14,7 @@ class Program
         //         → Are the types compatible across package boundaries?
         try
         {
-            HttpResponseMessage response = helperA.CreateDefaultResponse();
+            System.Net.Http.HttpResponseMessage response = helperA.CreateDefaultResponse();
             string processed = helperB.ProcessResponse(response);
             Console.WriteLine($"[A→B HttpResponseMessage] SUCCESS: {processed}");
         }
@@ -42,8 +41,8 @@ class Program
         //         → Is the consumer's own System.Net.Http compatible with both?
         try
         {
-            var myResponse = new HttpResponseMessage(System.Net.HttpStatusCode.Created);
-            myResponse.Content = new StringContent("Created by consumer");
+            var myResponse = new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.Created);
+            myResponse.Content = new System.Net.Http.StringContent("Created by consumer");
             string processed = helperB.ProcessResponse(myResponse);
             Console.WriteLine($"[Consumer→B HttpResponseMessage] SUCCESS: {processed}");
         }
