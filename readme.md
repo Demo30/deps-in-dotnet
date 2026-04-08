@@ -1,78 +1,98 @@
-# What is this?
+# Scenario kx7f2m – Microsoft.Net.Http ↔ System.Net.Http type compatibility
+
+## What is this?
 
 - This is not an app nor a library. This is just educational material on the topic of Dependency resolution in .NET
 - The focus is on the conflicts between libraries and related issues when duplicated with differing versions across the dependency tree.
 
-# Motivation for this repo
+## The scenario
 
-- Managing project dependencies and having control over them is easy in .NET. Until it's not.
-- This project should help us better understand different (problematic) situations that may arise when dealing with dependencies in .NET.
+Two direct dependencies expose and consume the same `System.Net.Http` types (`HttpResponseMessage`, `HttpRequestHeaders`) but obtain them through **different NuGet packages**:
 
-# Content of this repo
+| Library | Package used | Version |
+|---------|-------------|---------|
+| DirectDependencyA v1.0.0 | `Microsoft.Net.Http` 2.2.29 | The **old/deprecated** meta-package |
+| DirectDependencyA v2.0.0 | `System.Net.Http` 4.3.4 | The **current** package |
+| DirectDependencyB v1.0.0 | `System.Net.Http` 4.3.4 | The **current** package |
 
-- Different scenarios are maintained in separate branches prefixed with "scenario/" followed by an unique short id (to avoid reordering and have persistent reference).
-- Each branch contains:
-    - published .nupkg packages that are referenced from the main app representing the terminal consumer.
-    - NuGet.config with LocalFeed path to these packages
-    - readme.md dedicated to each scenario describing what is going on and what problematic behavior we encounter
+### Dependency structure
 
-## Scenario c61417, 25a851
+```
+ServiceConsumer (net472)
+├── DirectDependencyA v1.0.0 (net472)
+│   └── Microsoft.Net.Http 2.2.29
+│       ├── Microsoft.Bcl 1.1.10
+│       ├── Microsoft.Bcl.Build 1.0.14
+│       └── (framework assembly reference: System.Net.Http)
+│
+└── DirectDependencyB v1.0.0 (net472)
+    └── System.Net.Http 4.3.4
+```
 
-- Transitive dependency is referenced from the main project directly with lower version, but higher version of this Transitive dependency is also used by another referenced package.
+### What the consumer does
 
-## Scenario a0a93f, ea0545, mha17d
+The consumer exercises cross-package type compatibility by:
 
-- Transitive dependency is referenced from the main project directly with higher version, but lower version of this Transitive dependency is also used by Direct dependency package reference by the Main app.
+1. **A → B**: DirectDependencyA creates an `HttpResponseMessage` → consumer passes it to DirectDependencyB for processing
+2. **B → A**: DirectDependencyB creates `HttpRequestHeaders` → consumer passes them to DirectDependencyA for reading
+3. **Consumer → B**: Consumer itself creates an `HttpResponseMessage` → passes it to DirectDependencyB
 
-- a0a93f: lower version reference in Direct dependency is strict ("[1.0.0]")
+## The outcome
 
-- ea0545: lower version reference in Direct dependency is non-strict ("1.0.0")
+### Scenario 1 – DirectDependencyA v1.0.0 (Microsoft.Net.Http) + DirectDependencyB (System.Net.Http)
 
-- mha17d: lower version reference in Direct dependency is non-strict ("1.0.0") and also the higher version of Transitive dependency has changed return type of used method.
+**✅ All calls succeed.** The types are fully compatible.
 
-## Scenario a4328d, c2fc88, d0c14d, 05d335
+On .NET Framework 4.7.2, `Microsoft.Net.Http` does **not** ship its own `System.Net.Http.dll`. For `net45+` targets, it only provides:
+- `System.Net.Http.Extensions.dll` (contains `HttpClientHandlerExtensions`)
+- `System.Net.Http.Primitives.dll`
+- A `<frameworkAssembly>` reference pointing to the built-in `System.Net.Http.dll`
 
-- There are two different packages referenced which both in turn reference the same Transitive dependency. One of these packages uses lower version. Another one uses a higher version.
+Both libraries compile against the **same** `System.Net.Http, Version=4.2.0.0` (from the SDK reference assemblies targeting pack), and at runtime they load the **same** framework assembly. The types have identical identity.
 
-- c2fc88: further illustrates how the Transitive dependency may be outside of our focus (since we don't use functionality of Direct dependency B that uses it.).
+**Output directory** contains extra DLLs from the `Microsoft.Net.Http` dependency chain:
+```
+kx7f2m_DirectLibrary_A.dll
+kx7f2m_DirectLibrary_B.dll
+System.Net.Http.Extensions.dll    ← from Microsoft.Net.Http
+System.Net.Http.Primitives.dll    ← from Microsoft.Net.Http
+```
 
-- d0c14d: focuses on introduced nullability from the Transitive dependency and its consequences to the Direct dependency A and its method signature.
+### Scenario 2 – DirectDependencyA v2.0.0 (System.Net.Http) + DirectDependencyB (System.Net.Http)
 
-- 05d335: Direct dependency B forces usage of higher Transitive dependency in Direct dependency A. Transitive dependency has changed namespace of its return type.
+**✅ All calls still succeed.** The migration from `Microsoft.Net.Http` to `System.Net.Http` is fully transparent.
 
-## Scenario ac8156
+**Output directory** is cleaner — no more legacy Extensions/Primitives DLLs:
+```
+kx7f2m_DirectLibrary_A.dll
+kx7f2m_DirectLibrary_B.dll
+```
 
-- The main app used to reference “Direct dependency” by “1.0.0” which in turn referenced “Transitive dependency” by “[1.0.0]”. The main app uses the Transitive dependency directly without explicitly referencing it.
+The transitive dependencies (`Microsoft.Bcl`, `Microsoft.Bcl.Build`) are also gone.
 
-## Scenario bc9686
+## Key takeaways
 
-- Another level of dependency tree is introduced along with both A) flow drilling all the way down to the second level transitive dependency that **is still working fine** and B) flow drilling all the way down to the second level transitive dependency that **crashes in runtime call**.
+1. **Types are identical**: On `net472`, both `Microsoft.Net.Http` and `System.Net.Http` resolve to the same framework `System.Net.Http.dll`. The types (`HttpResponseMessage`, `HttpRequestHeaders`, `HttpClient`, etc.) have the same assembly identity and are fully interchangeable across package boundaries.
 
-## .NET Framework scenarios
+2. **`Microsoft.Net.Http` is a meta-package**: For `net45+`, it does not provide its own `System.Net.Http.dll`. It only adds the framework assembly reference plus Extensions/Primitives helper assemblies. For `net40` (where `System.Net.Http` was not part of the framework), it actually shipped the full `System.Net.Http.dll`.
 
-The scenarios below are specific to .NET Framework (4.7.2) and involve concepts such as assembly binding redirects and strong naming that do not apply to .NET (Core / 5+).
+3. **Migration is safe**: Switching from `Microsoft.Net.Http` to `System.Net.Http` on `net472` does not break type compatibility. The only observable change is the removal of transitive dependencies and extra DLLs.
 
-### Scenario phyb1l
+4. **Watch for transitive dependency loss**: If consumer code relies on types from `System.Net.Http.Extensions.dll` (e.g., `HttpClientHandlerExtensions`) that were transitively available through `Microsoft.Net.Http`, upgrading the dependency will remove them. The consumer would need to add its own explicit reference to `Microsoft.Net.Http` to retain those types.
 
-- A misconfigured binding redirect in `App.config` redirects all versions (0.0.0.0–9.9.9.9) of the Transitive dependency to version 2.0.0.0, which does not exist. The runtime cannot load the assembly and throws a `FileLoadException`. The inner exception documents a failed fallback attempt back to version 1.0.0.0, which is also blocked by the redirect — resulting in a cascading nested exception failure.
+5. **Both compile against the same version**: Despite using different NuGet packages, both libraries compile against `System.Net.Http, Version=4.2.0.0, PublicKeyToken=b03f5f7f11d50a3a` from the SDK reference assemblies. At runtime, the framework provides `System.Net.Http.dll` with assembly version `4.0.0.0`, and the CLR handles the version forwarding transparently.
 
-### Scenario 7h889t
+## How to run
 
-- A diamond dependency problem where both Direct dependency A and Direct dependency B reference the same Transitive dependency at different versions. Due to the "highest version wins" resolution strategy, a breaking change in the Transitive dependency (a namespace relocation of `ICalculationResult`) causes a **partial runtime failure**: methods returning primitive types (`ComputeSimple()`) continue to work, while methods depending on the relocated type (`Compute()`) throw a `MissingMethodException`.
+```bash
+./test-scenarios.sh
+```
 
-### Scenario vp1143
+Or manually toggle DirectDependencyA version in `ServiceConsumer.csproj`:
+```xml
+<!-- Scenario 1: Microsoft.Net.Http -->
+<PackageReference Include="kx7f2m_DirectLibrary_A" Version="1.0.0" />
 
-- The same diamond dependency structure as `7h889t`, but Transitive dependency v2.0.0 is **backwards compatible** (no breaking changes). Both direct dependencies are consumed as pre-built packages — simulating third-party vendor libraries whose source you don't own. The consumer resolves the conflict in two steps: an explicit NuGet version pin (to satisfy the package graph) and a binding redirect in `App.config` (to tell the CLR to serve v2.0.0 to anyone asking for v1.0.0 at runtime). Contrasts `7h889t` by showing when a binding redirect **can** fix the diamond problem.
-
-# Reminder about NuGet's local package cache
-
-- .nupkg packages are prefixed with the scenario's unique id to avoid issues with nuget local package cache on the user's machine
-- When experimenting with different versions of packages, beware of the nuget’s local package cache (“.nuget\packages”).
-- When the package consumer attempts to restore the package, nuget first attempts to retrieve the package from the cache based on its identification. 
-- This means that if we restore package A v1 once and then re-publish the package under the same version with different content (due to local experimentation), the older one will still be used unless the cache is cleaned! 
-- Clean up the cache to avoid surprises or use non-conflicting package identifications. 
-
-# Reminder about available syntax for referencing dependencies along with specified version
-
-- Many of the dependency-related issues may occur due to not defining dependency's version strictly enough. Basic \"Version=1.0.0\" means >= 1.0.0, therfore not necessarily version 1.0.0.
-- .NET gives us tools to specify versions of our dependencies in more strict/precise way. We may require exact version by: "[1.0.0]" or we can leverage the version ranging syntax "(1.0.0,5.0.0)" etc. See: https://learn.microsoft.com/en-us/nuget/concepts/package-versioning?tabs=semver20sort#version-ranges
+<!-- Scenario 2: System.Net.Http -->
+<PackageReference Include="kx7f2m_DirectLibrary_A" Version="2.0.0" />
+```
